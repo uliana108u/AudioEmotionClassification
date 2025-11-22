@@ -1,0 +1,41 @@
+data:
+  data_path: "data/raw/"
+  sampling_rate: 22050
+  duration: 3.0
+  emotions:
+    '01': 'neutral'
+    '02': 'calm'
+    '03': 'happy'
+    '04': 'sad'
+    '05': 'angry'
+    '06': 'fearful'
+    '07': 'disgust'
+    '08': 'surprised'
+
+features:
+  n_mfcc: 40
+  n_mels: 64
+  hop_length: 512
+  include_delta: true
+  include_delta_delta: true
+
+model:
+  name: "advanced_dnn"
+  input_dim: null
+  num_classes: 8
+  hidden_layers: [256, 128, 64]
+  dropout_rates: [0.4, 0.4, 0.3]
+  l2_regularization: 0.001
+
+training:
+  batch_size: 32
+  epochs: 100
+  learning_rate: 0.0005
+  early_stopping_patience: 20
+  reduce_lr_patience: 10
+
+paths:
+  processed_features: "data/processed/features.npy"
+  processed_labels: "data/processed/labels.npy"
+  model_checkpoint: "models/checkpoints/best_model.h5"
+  final_model: "models/final_model.h5"

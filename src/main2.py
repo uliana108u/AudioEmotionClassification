@@ -168,6 +168,20 @@ def create_cnn_model(input_shape, num_classes):
     return model
 
 
+# LSTM for temporal sequences
+def create_lstm_model(input_shape, num_classes):
+    model = keras.Sequential([
+        layers.Reshape((input_shape, 1)),
+        layers.LSTM(128, return_sequences=True),
+        layers.Dropout(0.3),
+        layers.LSTM(64),
+        layers.Dropout(0.3),
+        layers.Dense(32, activation='relu'),
+        layers.Dense(num_classes, activation='softmax')
+    ])
+    return model
+
+
 # Main execution
 def main():
     # Configuration
@@ -235,7 +249,8 @@ def main():
         y_train, y_val = y[train_idx], y[val_idx]
 
         # Create and compile model
-        model = create_advanced_model(X_train.shape[1], len(le.classes_))
+        # model = create_advanced_model(X_train.shape[1], len(le.classes_))
+        model = create_lstm_model(X_train.shape[1], len(le.classes_))
 
         model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=0.001),
