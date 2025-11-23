@@ -27,7 +27,6 @@ class Trainer:
         print(f"Training on {X_train.shape[0]} samples")
         print(f"Validating on {X_val.shape[0]} samples")
 
-        # Train model
         self.history = model.fit(
             X_train, y_train,
             validation_data=(X_val, y_val),
@@ -46,7 +45,6 @@ class Trainer:
             # Convert each value to Python native float
             history_dict[key] = [float(value) for value in values]
 
-        # Ensure directory exists
         os.makedirs(os.path.dirname(filepath) if os.path.dirname(filepath) else '.', exist_ok=True)
 
         with open(filepath, 'w') as f:
@@ -60,7 +58,6 @@ class Trainer:
 
         plt.figure(figsize=(15, 5))
 
-        # Accuracy plot
         plt.subplot(1, 2, 1)
         plt.plot(history.history['accuracy'], label='Training Accuracy', linewidth=2)
         plt.plot(history.history['val_accuracy'], label='Validation Accuracy', linewidth=2)
@@ -70,7 +67,6 @@ class Trainer:
         plt.legend()
         plt.grid(True, alpha=0.3)
 
-        # Loss plot
         plt.subplot(1, 2, 2)
         plt.plot(history.history['loss'], label='Training Loss', linewidth=2)
         plt.plot(history.history['val_loss'], label='Validation Loss', linewidth=2)
@@ -87,7 +83,6 @@ class Trainer:
         print(f"Training plots saved to {save_path}")
 
     def print_training_summary(self, history):
-        """Print training summary"""
         print("\n" + "=" * 50)
         print("TRAINING SUMMARY")
         print("=" * 50)
@@ -112,7 +107,6 @@ class Trainer:
         print("=" * 50)
 
     def evaluate(self, model, features, labels):
-        # Split data
         _, X_test, _, y_test = train_test_split(
             features, labels,
             test_size=0.2,

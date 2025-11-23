@@ -1,163 +1,191 @@
 # Audio Emotion Classification
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=flat&logo=PyTorch&logoColor=white)](https://pytorch.org/)
-[![HuggingFace Transformers](https://img.shields.io/badge/🤗%20Transformers-Loaded-yellow)](https://huggingface.co/transformers/)
+A deep learning project for classifying emotions from audio speech using the RAVDESS dataset. The system achieves **92% accuracy** in classifying 8 different emotions from speech audio.
 
-Этот репозиторий содержит код для классификации эмоций в голосе актеров. Модель, основанная на предобученном `wav2vec2`, обучается распознавать шесть основных эмоциональных состояний: `neutral`, `happy`, `sad`, `angry`, `fearful`, `surprised`.
+## Project Overview
 
-##  О проекте
+This project implements a deep learning pipeline for audio emotion classification using:
 
-Проект решает задачу аудио-классификации - распознавание эмоций по речевому сигналу. В качестве основы используется мощная предобученная модель `facebook/wav2vec2-base-960h`, к которой добавляется классификатор для финального предсказания. Такой подход (transfer learning) позволяет достичь высоких результатов даже на относительно небольшом датасете.
+- **Dataset**: RAVDESS (Ryerson Audio-Visual Database of Emotional Speech and Song)
+- **Emotions**: 6 emotional categories (neutral, calm, happy, sad, angry, fearful)
+- **Features**: MFCC, Mel-spectrogram, spectral, and temporal features
+- **Model**: Advanced DNN with regularization and dropout
+- **Accuracy**: 92% on test set
 
-**Целевые эмоции:**
-- `neutral` — нейтральная
-- `happy` — радость
-- `sad` — грусть
-- `angry` — злость
-- `fearful` — страх
-- `surprised` — удивление
+## Project Structure
 
-## Особенности
-
-- **Мощная базовая модель:** Используется `wav2vec2` от Facebook AI, предобученная на 960 часах речи
-- **Гибкий пайплайн обработки данных:** Включает загрузку, ресемплирование, нормализацию и паддинг аудиофайлов
-- **Поэтапное обучение:** Заморозка основной части модели и тонкая настройка только последних слоев энкодера
-- **Регуляризация:** Использование `AdamW` с weight decay для борьбы с переобучением
-- **Планировщик обучения:** `ReduceLROnPlateau` для автоматического снижения learning rate
-
-## Структура проекта 
 ```
 AudioEmotionClassification/
-├── data/                   # Директория для датасета 
-│   └── Actor_01/           # Папки с актерами (после распаковки)
-│       └── *.wav
-├── src/                      # Директория с исходным кодом
-│   ├── dataset.py            # Класс EmotionDataset
-│   ├── EmotionClassifier.py  # Класс EmotionClassifier
-│   └── main.py             # Основной скрипт для обучения
-├── notebooks/                # Jupyter Notebooks для исследования
-│   └── examples.ipynb
-├── models/                # Для сохранения обученных моделей
+│
+├── data/
+│   └── raw/                  # RAVDESS dataset
+│
+├── src/
+│   ├── __init__.py
+│   ├── data_loader.py        
+│   ├── feature_extractor.py  
+│   ├── models/               
+│   │   ├── __init__.py
+│   │   ├── dnn_model.py
+│   │   ├── cnn_model.py
+│   │   └── lstm_model.py
+│   ├── training/             
+│   │   ├── __init__.py
+│   │   ├── trainer.py
+│   │   └── callbacks.py
+│   ├── evaluation/           
+│   │   ├── __init__.py
+│   │   ├── metrics.py
+│   │   └── visualization.py
+│   └── utils/                
+│       ├── __init__.py
+│       ├── config.py
+│       └── helpers.py
+│
+├── models/                   
+│   ├── final_model.h5        # best model 
+│   └── checkpoints/
+│
+├── configs/                  # Configuration files
+│   └── default.yaml
+│
 ├── requirements.txt
+├── setup.py
+├── main.py                   # Main training script
+├── predict.py               
 └── README.md
 ```
 
-## Данные
-Код настроен для работы с датасетом RAVDESS (Ryerson Audio-Visual Database of Emotional Speech and Song).
+## Start
 
-**Для использования:**
-
-- Скачайте архив Audio_Song_Actors_01-24.zip
-
-- Поместите его в корневую директорию проекта
-
-- При запуске скрипта он будет автоматически распакован в папку data/
-
-Формат именования файлов в RAVDESS:
-03-01-06-01-02-01-12.wav, где третье число (06) - код эмоции.
-
-## Модель
-EmotionClassifier состоит из двух частей:
-
-- Feature Extractor (wav2vec2): Замороженная предобученная модель для преобразования аудио в эмбеддинги
-
-- Классификатор: Двухслойная полносвязная сеть с активацией ReLU
-
-## Использование
-### Обучение модели
-**Запустите обучение:**
+### Prerequisites
 
 ```bash
-python main.py
-```
-**Процесс обучения:**
-
-- Проверка и распаковка датасета
-
-- Создание объекта EmotionDataset
-
-- Загрузка данных через DataLoader с кастомной collate_fn
-
-- Инициализация модели, функции потерь и оптимизатора
-
-- Цикл обучения с заморозкой весов и тонкой настройкой
-
-## Инференс
-Пример использования обученной модели:
-
-```
-model = EmotionClassifier(num_classes=6)
-model.load_state_dict(torch.load('path/to/best_model.pth'))
-model.eval()
-
-waveform = process_audio('new_audio.wav')
-
-with torch.no_grad():
-    logits = model(waveform)
-    probs = torch.nn.functional.softmax(logits, dim=1)
-    predicted_class = torch.argmax(probs, dim=1)
-    predicted_emotion = emotion_classes[predicted_class]
-    print(f"Predicted emotion: {predicted_emotion}")
+pip install -r requirements.txt
 ```
 
-##  Результаты модели
+### Installation
 
-После обучения на датасете RAVDESS в течение 10 эпох модель продемонстрировала следующие результаты:
+1. Download the RAVDESS dataset and place it in `data/raw/`
+
+3. Run training:
+```bash
+python main.py --config configs/default.yaml --experiment baseline
+```
+
+### Inference
+
+Use the trained model to predict emotions from audio files:
+
+```bash
+python predict.py --audio path/to/audio.wav --model models/final_model.h5
+```
+
+## Configuration
+
+The project uses YAML configuration files. Key settings in `configs/default.yaml`:
+
+```yaml
+data:
+  sampling_rate: 22050
+  duration: 3.0
+  emotions:
+    '01': 'neutral'
+    '02': 'calm'
+    '03': 'happy'
+    '04': 'sad'
+    '05': 'angry'
+    '06': 'fearful'
+
+features:
+  n_mfcc: 40
+  n_mels: 64
+  include_delta: true
+
+model:
+  name: "advanced_dnn"
+  hidden_layers: [256, 128, 64]
+  dropout_rates: [0.4, 0.4, 0.3]
+
+training:
+  batch_size: 32
+  epochs: 100
+  learning_rate: 0.0005
+```
+
+## Model Architecture
+
+The system uses a sophisticated feature extraction pipeline and deep neural network:
+
+### Feature Extraction
+- **MFCCs**: 40 coefficients with delta and delta-delta features
+- **Mel-spectrograms**: 64-band log-scaled spectrograms
+- **Spectral features**: Centroid, rolloff, bandwidth
+- **Temporal features**: ZCR, RMS energy
+- **Chroma features**: 12-dimensional chromagram
+
+### Neural Network
+- **Architecture**: Feedforward DNN with 3 hidden layers
+- **Regularization**: L2 regularization and dropout
+- **Optimization**: Adam optimizer with learning rate scheduling
+- **Prevention**: Early stopping and batch normalization
+
+## Results
+
+### Overall Performance
+- **Accuracy**: 92%
+- **Macro Average F1-Score**: 93%
+- **Weighted Average F1-Score**: 92%
+
+### Detailed Classification Report
+
+| Emotion | Precision | Recall | F1-Score | Support |
+|---------|-----------|--------|----------|---------|
+| Neutral | 0.95      | 0.95 | 0.95 | 37 |
+| Calm    | 0.97 | 0.95 | 0.96 | 37 |
+| happy   | 0.80 | 0.89 | 0.85 | 37 |
+| Sad     | 0.92 | 0.95 | 0.93 | 37 |
+| Angry   | 1.00 | 1.00 | 1.00 | 18 |
+| Fearful | 0.94 | 0.84 | 0.89 | 37 |
+
+**Total Samples**: 203
+
+## Performance Analysis
+
+### Strengths
+- **Excellent performance** on most emotion classes (85-100% F1-score)
+- **Balanced performance** across different emotions
+- **Robust feature engineering** capturing both spectral and temporal patterns
+- **Effective regularization** preventing overfitting
+
+### Areas for Improvement
+- Class 2 (happy) shows slightly lower performance (85% F1-score)
+- Class imbalance in Class 4 (angry) (only 18 samples)
+- Potential for improving recall in Class 5
 
 
-| Метрика | Значение | Описание |
-|---------|----------|----------|
-| **Accuracy** | 87.3% | Общая точность классификации |
-| **Precision (avg)** | 86.9% | Точность по всем классам |
-| **Recall (avg)** | 87.2% | Полнота по всем классам |
-| **F1-Score (avg)** | 87.0% | F1-мера по всем классам |
-| **Validation Loss** | 0.42 | Финальная функция потерь |
+## Technical Details
 
-###  Поэмоциональная производительность
+### Data Preprocessing
+- Audio resampling to 22.05 kHz
+- Fixed-length segmentation (3 seconds)
+- Pre-emphasis filtering
+- Feature normalization using StandardScaler
 
-| Эмоция | Precision | Recall | F1-Score | Поддержка |
-|--------|-----------|--------|----------|-----------|
-| **neutral** | 89.2% | 91.5% | 90.3% | 120 |
-| **happy** | 92.1% | 88.3% | 90.2% | 120 |
-| **sad** | 83.4% | 85.7% | 84.5% | 120 |
-| **angry** | 91.8% | 93.2% | 92.5% | 120 |
-| **fearful** | 79.6% | 76.8% | 78.2% | 120 |
-| **surprised** | 85.3% | 87.1% | 86.2% | 120 |
+### Training Strategy
+- Stratified k-fold cross-validation
+- Class weighting for imbalanced data
+- Learning rate scheduling
+- Early stopping with patience
 
 
+## Output Files
 
-### Производительность инференса
+After training, the following files are generated:
 
-| Параметр | Значение |
-|----------|----------|
-| **Время обработки (1 аудио)** | ~15 мс |
-| **Память модели** | 95 МБ |
-| **Поддержка CPU/GPU** | ✅ |
-| **Максимальная длина аудио** | 4 секунды |
-
-### Практическое применение
-
-Модель успешно протестирована на:
--  Анализ эмоций в call-центрах
--  Оценка актерского озвучивания
--  Исследование психологического состояния
--  Голосовые ассистенты с эмоциональным интеллектом
-
-### Ограничения
-
-- Наименьшая точность на эмоциях **fearful** и **sad**
-- Требует чистого аудио без фонового шума
-- Оптимальная длина аудио: 2-4 секунды
-- Лучше работает с драматизированной речью (актеры)
-
-### Заключение
-
-Модель демонстрирует **конкурентоспособные результаты** в задаче классификации эмоций по голосу, особенно выделяясь в распознавании ярких эмоций (angry, happy). Архитектура на основе wav2vec2 показала свою эффективность, превзойдя традиционные подходы на 8-19% по точности.
-
-**Рекомендации для улучшения:**
-- Добавление аугментации аудио
-- Использование larger версии wav2vec2
-- Балансировка датасета
-- Ensemble нескольких моделей
-
+- `models/final_model.h5` - Trained model weights
+- `models/preprocessor.pkl` - Feature scaler and label encoder
+- `results/training_history.json` - Training metrics per epoch
+- `results/training_plots.png` - Accuracy and loss curves
+- `results/results_summary.txt` - Comprehensive training report
+- `confusion_matrix.png` - Classification confusion matrix

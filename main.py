@@ -52,7 +52,6 @@ def main():
 
         if np.isnan(features).any():
             print("WARNING: Features contain NaN values!")
-            # Replace NaN with 0
             features = np.nan_to_num(features)
 
         print("Creating model...")
