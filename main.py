@@ -7,6 +7,8 @@ from src.models.model_factory import ModelFactory
 from src.training.trainer import Trainer
 from src.utils.config import Config
 import numpy as np
+import json
+import matplotlib.pyplot as plt
 
 sys.path.append('src')
 
@@ -59,6 +61,40 @@ def main():
         print("Training model...")
         trainer = Trainer(config)
         history = trainer.train(model, features, labels_encoded)
+
+        print("\nSaving training history...")
+
+        # Convert numpy float32 to Python float for JSON serialization
+        history_dict = {}
+        for key, values in history.history.items():
+            history_dict[key] = [float(value) for value in values]
+
+        with open('training_history.json', 'w') as f:
+            json.dump(history_dict, f, indent=2)
+
+        plt.figure(figsize=(12, 4))
+
+        plt.subplot(1, 2, 1)
+        plt.plot(history.history['accuracy'], label='Training Accuracy')
+        plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+        plt.title('Model Accuracy')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.legend()
+
+        plt.subplot(1, 2, 2)
+        plt.plot(history.history['loss'], label='Training Loss')
+        plt.plot(history.history['val_loss'], label='Validation Loss')
+        plt.title('Model Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+
+        plt.tight_layout()
+        plt.savefig('training_history.png', dpi=300, bbox_inches='tight')
+        plt.show()
+
+        print("Training history saved to 'training_history.json' and 'training_history.png'")
 
         print("Evaluating model...")
         trainer.evaluate(model, features, labels_encoded)
