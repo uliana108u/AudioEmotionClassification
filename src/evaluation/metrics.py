@@ -5,14 +5,13 @@ import seaborn as sns
 
 
 class EvaluationMetrics:
-    def __init__(self, model, X_test, y_test, label_encoder=None):
+    def __init__(self, model, x_test, y_test, label_encoder=None):
         self.model = model
-        self.X_test = X_test
+        self.X_test = x_test
         self.y_test = y_test
         self.label_encoder = label_encoder
 
     def print_classification_report(self):
-        """Print detailed classification report"""
         y_pred = self.model.predict(self.X_test)
         y_pred_classes = np.argmax(y_pred, axis=1)
 
@@ -41,3 +40,4 @@ class EvaluationMetrics:
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.show()
+

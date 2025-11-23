@@ -1,5 +1,4 @@
 import argparse
-import yaml
 import os
 import sys
 from src.data_loader import DataLoader
@@ -7,8 +6,8 @@ from src.feature_extractor import FeatureExtractor
 from src.models.model_factory import ModelFactory
 from src.training.trainer import Trainer
 from src.utils.config import Config
+import numpy as np
 
-# Add src to path
 sys.path.append('src')
 
 
@@ -20,43 +19,61 @@ def main():
                         help='Experiment name')
     args = parser.parse_args()
 
-    # Load configuration
     config = Config(args.config)
 
-    # Create necessary directories
     os.makedirs('data/processed', exist_ok=True)
     os.makedirs('models/checkpoints', exist_ok=True)
 
     print("Starting Audio Emotion Classification Training")
     print(f"Experiment: {args.experiment}")
 
-    # Load and preprocess data
-    print("Loading data...")
-    data_loader = DataLoader(config)
-    file_paths, labels = data_loader.load_data()
+    try:
+        print("Loading data...")
+        data_loader = DataLoader(config)
+        file_paths, labels = data_loader.load_data()
 
-    # Extract features
-    print("🎵 Extracting features...")
-    feature_extractor = FeatureExtractor(config)
-    features, labels_encoded = feature_extractor.extract_features(file_paths, labels)
+        print(f"Sample files: {file_paths[:3]}")
+        print(f"Sample labels: {labels[:3]}")
 
-    # Create model
-    print("🧠 Creating model...")
-    model = ModelFactory.create_model(config, input_shape=features.shape[1])
+        print("Extracting features...")
+        feature_extractor = FeatureExtractor(config)
 
-    # Train model
-    print("🏋️ Training model...")
-    trainer = Trainer(config)
-    history = trainer.train(model, features, labels_encoded)
+        expected_length = feature_extractor.calculate_expected_feature_length()
+        print(f"Expected feature vector length: {expected_length}")
 
-    # Evaluate model
-    print("📈 Evaluating model...")
-    trainer.evaluate(model, features, labels_encoded)
+        features, labels_encoded = feature_extractor.extract_features(file_paths, labels)
 
-    # Save final model
-    model_path = config.paths.final_model
-    model.save(model_path)
-    print(f"💾 Model saved to {model_path}")
+        print(f"Final feature matrix shape: {features.shape}")
+        print(f"Labels shape: {labels_encoded.shape}")
+        print(f"Feature range: [{np.min(features):.3f}, {np.max(features):.3f}]")
+        print(f"Feature mean: {np.mean(features):.3f}, std: {np.std(features):.3f}")
+
+        if np.isnan(features).any():
+            print("WARNING: Features contain NaN values!")
+            # Replace NaN with 0
+            features = np.nan_to_num(features)
+
+        print("Creating model...")
+        model = ModelFactory.create_model(config, input_shape=features.shape[1])
+
+        print("Training model...")
+        trainer = Trainer(config)
+        history = trainer.train(model, features, labels_encoded)
+
+        print("Evaluating model...")
+        trainer.evaluate(model, features, labels_encoded)
+
+        model_path = config.paths.final_model
+        model.save(model_path)
+        print(f"Model saved to {model_path}")
+
+        feature_extractor.save_preprocessor('models/preprocessor.pkl')
+        print("Preprocessor saved")
+
+    except Exception as e:
+        print(f"Error in main execution: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@ import tensorflow as tf
 
 
 def get_callbacks(config):
-    """Get training callbacks"""
     callbacks = [
         tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
@@ -27,3 +26,4 @@ def get_callbacks(config):
     ]
 
     return callbacks
+

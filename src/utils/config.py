@@ -25,7 +25,6 @@ class Config:
                 setattr(parent if parent else self, key, value)
 
     def get_emotions_dict(self):
-        """Get emotions as a dictionary"""
         return self.data.emotions if hasattr(self.data, 'emotions') else {}
 
     def __str__(self):

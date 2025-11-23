@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 
 
 def plot_training_history(history, save_path='training_history.png'):
-    """Plot training history"""
     plt.figure(figsize=(15, 5))
 
     # Accuracy plot
@@ -14,7 +13,6 @@ def plot_training_history(history, save_path='training_history.png'):
     plt.ylabel('Accuracy')
     plt.legend()
 
-    # Loss plot
     plt.subplot(1, 3, 2)
     plt.plot(history.history['loss'], label='Training Loss')
     plt.plot(history.history['val_loss'], label='Validation Loss')
@@ -23,7 +21,6 @@ def plot_training_history(history, save_path='training_history.png'):
     plt.ylabel('Loss')
     plt.legend()
 
-    # Learning rate plot (if available)
     plt.subplot(1, 3, 3)
     if 'lr' in history.history:
         plt.plot(history.history['lr'], label='Learning Rate')
@@ -38,7 +35,6 @@ def plot_training_history(history, save_path='training_history.png'):
 
 
 def plot_confusion_matrix(cm, class_names, save_path='confusion_matrix.png'):
-    """Plot confusion matrix"""
     import seaborn as sns
 
     plt.figure(figsize=(10, 8))

@@ -31,7 +31,6 @@ class LSTMModel:
         # Output layer
         model.add(layers.Dense(config.model.num_classes, activation='softmax'))
 
-        # Compile model
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=config.training.learning_rate),
             loss='sparse_categorical_crossentropy',
@@ -39,3 +38,4 @@ class LSTMModel:
         )
 
         return model
+

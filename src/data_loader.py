@@ -6,21 +6,18 @@ from typing import List, Tuple
 class DataLoader:
     def __init__(self, config):
         self.config = config
-        # Get emotions as dictionary
         self.emotions = config.get_emotions_dict()
 
     def load_data(self) -> Tuple[List[str], List[str]]:
-        """Load audio file paths and corresponding labels"""
         file_paths = []
         labels = []
 
         data_path = self.config.data.data_path
 
-        # Check if data path exists
         if not os.path.exists(data_path):
             raise FileNotFoundError(f"Data path not found: {data_path}")
 
-        print(f"🔍 Searching for audio files in: {data_path}")
+        print(f"Searching for audio files in: {data_path}")
 
         for root, dirs, files in os.walk(data_path):
             for file in files:
@@ -39,23 +36,23 @@ class DataLoader:
                                 file_paths.append(file_path)
                                 labels.append(self.emotions[emotion_code])
                             else:
-                                print(f"⚠️  Skipping {file}: emotion code {emotion_code} not in configured emotions")
+                                print(f"Skipping {file}: emotion code {emotion_code} not in configured emotions")
                         else:
-                            print(f"⚠️  Skipping {file}: invalid filename format")
+                            print(f"Skipping {file}: invalid filename format")
 
                     except Exception as e:
-                        print(f"❌ Error processing {file}: {str(e)}")
+                        print(f"Error processing {file}: {str(e)}")
                         continue
 
         if len(file_paths) == 0:
             raise ValueError("No audio files found! Check your data path and file structure.")
 
-        print(f"📁 Loaded {len(file_paths)} audio files")
-        print(f"🎭 Emotions distribution: {self.get_class_distribution(labels)}")
+        print(f"Loaded {len(file_paths)} audio files")
+        print(f"Emotions distribution: {self.get_class_distribution(labels)}")
 
         return file_paths, labels
 
     def get_class_distribution(self, labels):
-        """Get distribution of classes"""
         unique, counts = np.unique(labels, return_counts=True)
         return dict(zip(unique, counts))
+

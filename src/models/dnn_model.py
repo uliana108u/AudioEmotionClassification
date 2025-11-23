@@ -7,7 +7,6 @@ class DNNModel:
     def create(config, input_shape):
         model = tf.keras.Sequential()
 
-        # Input layer
         model.add(layers.Dense(
             config.model.hidden_layers[0],
             activation='relu',
@@ -17,7 +16,6 @@ class DNNModel:
         model.add(layers.BatchNormalization())
         model.add(layers.Dropout(config.model.dropout_rates[0]))
 
-        # Hidden layers
         for i, (units, dropout_rate) in enumerate(
                 zip(config.model.hidden_layers[1:], config.model.dropout_rates[1:])
         ):
@@ -32,7 +30,6 @@ class DNNModel:
         # Output layer
         model.add(layers.Dense(config.model.num_classes, activation='softmax'))
 
-        # Compile model
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=config.training.learning_rate),
             loss='sparse_categorical_crossentropy',
@@ -40,3 +37,4 @@ class DNNModel:
         )
 
         return model
+
