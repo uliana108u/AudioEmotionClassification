@@ -14,15 +14,12 @@ class EmotionPredictor:
         self.label_encoder = self.feature_extractor.label_encoder
 
     def predict(self, audio_path):
-        """Predict emotion from audio file"""
         features = self.feature_extractor.extract_features_from_file(audio_path)
         if features is None:
             return None
 
-        # Reshape for model prediction
         features = features.reshape(1, -1)
 
-        # Make prediction
         prediction = self.model.predict(features)
         predicted_class = np.argmax(prediction, axis=1)[0]
         confidence = np.max(prediction, axis=1)[0]
@@ -53,13 +50,13 @@ def main():
     result = predictor.predict(args.audio)
 
     if result:
-        print(f"🎭 Predicted Emotion: {result['emotion']}")
-        print(f"📊 Confidence: {result['confidence']:.2%}")
+        print(f"Predicted Emotion: {result['emotion']}")
+        print(f"Confidence: {result['confidence']:.2%}")
         print("\nProbabilities:")
         for emotion, prob in result['probabilities'].items():
             print(f"  {emotion}: {prob:.2%}")
     else:
-        print("❌ Failed to process audio file")
+        print("Failed to process audio file")
 
 
 if __name__ == "__main__":
